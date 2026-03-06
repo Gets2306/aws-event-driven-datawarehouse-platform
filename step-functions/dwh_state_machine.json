@@ -1,0 +1,35 @@
+{
+  "Comment": "Event Driven DWH Orchestration",
+  "StartAt": "IdentifyBatch",
+  "States": {
+    "IdentifyBatch": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:region:account:function:batchidentifier",
+      "Next": "CleanserLayer"
+    },
+    "CleanserLayer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "cleanser-layer-job"
+      },
+      "Next": "ConformedLayer"
+    },
+    "ConformedLayer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "conformed-layer-job"
+      },
+      "Next": "DWHLoad"
+    },
+    "DWHLoad": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "dwh-loader-job"
+      },
+      "End": true
+    }
+  }
+}
